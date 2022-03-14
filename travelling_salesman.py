@@ -29,18 +29,25 @@ def dist(pos, route):
 
 
 # annealing schedule
-def gen_schedule():
-    start = 10
-    stop = 0
-    tstep = 0.1
-    numit = 10
-
-    now = start
+def gen_schedule(name):
     schedule = []
-    while now >= stop:
-        for _ in range(numit):
-            schedule.append(now)
-        now -= tstep
+    if name == 'linear':
+        start = 10
+        stop = 0
+        tstep = 0.1
+        w = 10
+
+        now = start
+        while now >= stop:
+            for _ in range(w):
+                schedule.append(now)
+            now -= tstep
+    elif name == 'log':
+        w = 100
+        for x in np.linspace(0.1, 9, 100):
+            for _ in range(w):
+                schedule.append(1 - np.log10(x))
+
     return schedule
 
 
@@ -63,7 +70,7 @@ x0.append(0)
 f = lambda r: dist(pos, r)
 
 # annealing schedule
-schedule = gen_schedule()
+schedule = gen_schedule('log')
 
 # simulated annealing test
 xstar, fstar, xlog, flog, plog = sa(x0, f, perturb_rand, schedule)
@@ -81,6 +88,13 @@ plt.figure()
 plt.plot(idx, plog)
 plt.xlabel('iteration')
 plt.ylabel('probability')
+plt.title('annealing probability')
+
+# plot probability
+plt.figure()
+plt.plot(list(range(len(schedule))), schedule)
+plt.xlabel('iteration')
+plt.ylabel('temperature')
 plt.title('annealing schedule')
 
 # plot solution
