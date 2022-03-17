@@ -73,6 +73,13 @@ def gen_schedule(name):
         for x in np.linspace(0.0001, 7, 200):
             for _ in range(w):
                 schedule.append(1 - np.log10(x))
+    elif name == 'reanneal':
+        w = 100
+        for x in np.linspace(0.0001, 7, 200):
+            for _ in range(w):
+                schedule.append(1 - np.log10(x) + 0.1 * np.sin(10 * x))
+    else:
+        assert False, 'Invalid schedule name'
     return schedule
 
 
@@ -100,11 +107,11 @@ x0.append(0)
 f = lambda r: dist(pos, r)
 
 # annealing schedule
-schedule = gen_schedule('log')
+schedule = gen_schedule('reanneal')
 
 # simulated annealing test
-xstar, fstar, xlog, flog, plog = sa(x0, f, perturb_neighbor, schedule)
-print('optimal distance =', fstar)
+xstar, fstar, xlog, flog, plog = sa(x0, f, perturb_rand, schedule)
+print('optimal distance = {:.2f}'.format(fstar))
 idx = list(range(len(flog)))
 
 # plot cost
