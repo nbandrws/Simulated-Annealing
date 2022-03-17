@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# route perturbations
+# perturb: random swap
 def perturb_rand(r):
     rp = r.copy()
 
@@ -17,6 +17,32 @@ def perturb_rand(r):
     # swap their order in the route
     rp[c1], rp[c2] = rp[c2], rp[c1]
     assert rp[0] is rp[-1]
+    return rp
+
+
+# perturb: swap neighbors
+def perturb_neighbor(r):
+    rp = r.copy()
+
+    # pick random city in route
+    c1 = np.random.randint(1, len(rp) - 1)
+
+    # check if 2nd or 2nd to last; can't swap with end points
+    if c1 == 1:
+        # 2nd point; can only swap forward
+        rp[c1], rp[c1 + 1] = rp[c1 + 1], rp[c1]
+    elif c1 == len(rp) - 2:
+        # 2nd to last; can only swap backward
+        rp[c1], rp[c1 - 1] = rp[c1 - 1], rp[c1]
+    else:
+        # random draw for swap direction
+        flip = np.random.randint(0, 2)
+        if flip == 0:
+            # swap forward
+            rp[c1], rp[c1 + 1] = rp[c1 + 1], rp[c1]
+        elif flip == 1:
+            # swap backward
+            rp[c1], rp[c1 - 1] = rp[c1 - 1], rp[c1]
     return rp
 
 
@@ -43,11 +69,10 @@ def gen_schedule(name):
                 schedule.append(now)
             now -= tstep
     elif name == 'log':
-        w = 100
-        for x in np.linspace(0.1, 9, 100):
+        w = 200
+        for x in np.linspace(0.0001, 7, 200):
             for _ in range(w):
                 schedule.append(1 - np.log10(x))
-
     return schedule
 
 
@@ -62,9 +87,14 @@ pos = {}
 for i in range(n):
     pos[i] = np.random.uniform(lo_lim, hi_lim, 2)
 
-# initial guess
+# initial route guess
 x0 = [i for i in range(n)]
 x0.append(0)
+
+# perturb neighbor test
+# for i in range(10):
+#     rp = perturb_neighbor(x0)
+#     print(rp)
 
 # cost function
 f = lambda r: dist(pos, r)
@@ -73,7 +103,8 @@ f = lambda r: dist(pos, r)
 schedule = gen_schedule('log')
 
 # simulated annealing test
-xstar, fstar, xlog, flog, plog = sa(x0, f, perturb_rand, schedule)
+xstar, fstar, xlog, flog, plog = sa(x0, f, perturb_neighbor, schedule)
+print('optimal distance =', fstar)
 idx = list(range(len(flog)))
 
 # plot cost
