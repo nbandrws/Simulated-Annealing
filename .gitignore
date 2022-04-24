@@ -1,0 +1,6 @@
+
+.idea/.name
+*.xml
+*.pyc
+*.iml
+.DS_Store
